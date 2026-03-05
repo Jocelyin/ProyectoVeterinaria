@@ -114,65 +114,82 @@ import Layout from '../layouts/Layout.astro';
 
          <!-- 4. VIEW: CITAS (Calendar) -->
         <div id="viewCitas" class="hidden">
-            <div class="flex gap-6 animate-fade-in">
-                <!-- Sidebar -->
-                <div class="w-64 flex-shrink-0 space-y-4">
-                    <!-- Mini Calendar -->
-                    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <button onclick="miniCalNav(-1)" class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors">&lt;</button>
-                            <span id="miniCalTitle" class="text-sm font-bold text-white"></span>
-                            <button onclick="miniCalNav(1)" class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors">&gt;</button>
-                        </div>
-                        <div class="grid grid-cols-7 gap-0 text-center text-xs">
-                            <span class="text-gray-500 py-1 font-semibold">L</span>
-                            <span class="text-gray-500 py-1 font-semibold">M</span>
-                            <span class="text-gray-500 py-1 font-semibold">X</span>
-                            <span class="text-gray-500 py-1 font-semibold">J</span>
-                            <span class="text-gray-500 py-1 font-semibold">V</span>
-                            <span class="text-gray-500 py-1 font-semibold">S</span>
-                            <span class="text-gray-500 py-1 font-semibold">D</span>
-                        </div>
-                        <div id="miniCalDays" class="grid grid-cols-7 gap-0 text-center text-xs"></div>
-                    </div>
-                    <!-- Nueva Cita Button -->
-                    <button onclick="openCreateCitaModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-2xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Nueva Cita
-                    </button>
-                    <!-- Legend -->
-                    <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Estado</h4>
-                        <div class="space-y-2 text-xs">
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-500"></span><span class="text-gray-300">Pendiente</span></div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span><span class="text-gray-300">Completada</span></div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-500"></span><span class="text-gray-300">Cancelada</span></div>
-                        </div>
+            <div class="animate-fade-in">
+                <!-- Top Navigation Bar -->
+                <div class="flex items-center justify-between mb-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="goToToday()" class="text-sm bg-white/10 hover:bg-white/15 text-white px-4 py-1.5 rounded-lg transition-colors font-medium">Esta semana</button>
+                        <button onclick="navigateWeek(-1)" class="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button onclick="navigateWeek(1)" class="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                        <h2 id="calWeekTitle" class="text-lg font-bold text-white ml-2"></h2>
                     </div>
                 </div>
-                <!-- Main Calendar -->
-                <div class="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                    <!-- Week Navigation Header -->
-                    <div class="flex items-center justify-between p-4 border-b border-white/10">
-                        <div class="flex items-center gap-3">
-                            <button onclick="navigateWeek(-1)" class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            </button>
-                            <button onclick="navigateWeek(1)" class="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                            <h2 id="calWeekTitle" class="text-lg font-bold text-white"></h2>
+
+                <!-- Main Content: Calendar Grid + Right Sidebar -->
+                <div class="flex gap-4">
+                    <!-- Main Calendar Grid -->
+                    <div class="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                        <!-- Day Headers -->
+                        <div class="grid grid-cols-[50px_repeat(6,1fr)] border-b border-white/10">
+                            <div class="p-2"></div>
+                            <div id="calDayHeaders" class="contents"></div>
                         </div>
-                        <button onclick="goToToday()" class="text-sm bg-white/10 hover:bg-white/15 text-white px-4 py-1.5 rounded-lg transition-colors">Hoy</button>
+                        <!-- Time Grid -->
+                        <div id="calendarGrid" class="relative overflow-y-auto" style="max-height: 600px;">
+                            <!-- Rows injected by JS -->
+                        </div>
                     </div>
-                    <!-- Day Headers -->
-                    <div class="grid grid-cols-[60px_repeat(7,1fr)] border-b border-white/10">
-                        <div class="p-2"></div>
-                        <div id="calDayHeaders" class="contents"></div>
-                    </div>
-                    <!-- Time Grid -->
-                    <div id="calendarGrid" class="relative overflow-y-auto" style="max-height: 600px;">
-                        <!-- Rows injected by JS -->
+
+                    <!-- Right Sidebar -->
+                    <div class="w-64 flex-shrink-0 space-y-4">
+                        <!-- Nueva Cita Button -->
+                        <button onclick="openCreateCitaModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-2xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            + Nueva Cita
+                        </button>
+
+                        <!-- Mini Calendar -->
+                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <button onclick="miniCalNav(-1)" class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors">&lt;</button>
+                                <span id="miniCalTitle" class="text-sm font-bold text-white"></span>
+                                <button onclick="miniCalNav(1)" class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors">&gt;</button>
+                            </div>
+                            <div class="grid grid-cols-7 gap-0 text-center text-xs">
+                                <span class="text-gray-500 py-1 font-semibold">L</span>
+                                <span class="text-gray-500 py-1 font-semibold">M</span>
+                                <span class="text-gray-500 py-1 font-semibold">X</span>
+                                <span class="text-gray-500 py-1 font-semibold">J</span>
+                                <span class="text-gray-500 py-1 font-semibold">V</span>
+                                <span class="text-gray-500 py-1 font-semibold">S</span>
+                                <span class="text-gray-500 py-1 font-semibold">D</span>
+                            </div>
+                            <div id="miniCalDays" class="grid grid-cols-7 gap-0 text-center text-xs"></div>
+                        </div>
+
+                        <!-- Visitas de hoy -->
+                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <span class="text-emerald-400">▽</span> Visitas de hoy
+                            </h4>
+                            <div id="todayVisitsList" class="space-y-2 text-xs max-h-[300px] overflow-y-auto">
+                                <!-- Injected by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Estado</h4>
+                            <div class="space-y-2 text-xs">
+                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-500"></span><span class="text-gray-300">Pendiente</span></div>
+                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span><span class="text-gray-300">Completada</span></div>
+                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-500"></span><span class="text-gray-300">Cancelada</span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1396,7 +1413,7 @@ import Layout from '../layouts/Layout.astro';
         const headersEl = document.getElementById('calDayHeaders');
         if (headersEl) {
             let hhtml = '';
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 6; i++) {
                 const d = addDays(calWeekStart, i);
                 const isToday = isSameDay(d, today);
                 hhtml += `<div class="p-3 text-center border-l border-white/5 ${isToday ? 'bg-blue-600/20' : ''}">`;
@@ -1416,9 +1433,9 @@ import Layout from '../layouts/Layout.astro';
         // Hour rows
         for (let h = CAL_HOURS_START; h < CAL_HOURS_END; h++) {
             const top = (h - CAL_HOURS_START) * CAL_ROW_HEIGHT;
-            ghtml += `<div class="absolute left-0 right-0 grid grid-cols-[60px_repeat(7,1fr)]" style="top:${top}px; height:${CAL_ROW_HEIGHT}px;">`;
+            ghtml += `<div class="absolute left-0 right-0 grid grid-cols-[50px_repeat(6,1fr)]" style="top:${top}px; height:${CAL_ROW_HEIGHT}px;">`;
             ghtml += `<div class="text-xs text-gray-500 pr-2 text-right pt-1 select-none">${String(h).padStart(2,'0')}:00</div>`;
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 6; i++) {
                 const d = addDays(calWeekStart, i);
                 const isToday = isSameDay(d, today);
                 const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1438,7 +1455,7 @@ import Layout from '../layouts/Layout.astro';
         const slotMap = {}; // key: "dayIdx-hour" -> [cita, ...]
         (cache.citas || []).forEach(cita => {
             const dt = new Date(cita.fecha_hora);
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 6; i++) {
                 const dayDate = addDays(calWeekStart, i);
                 if (isSameDay(dt, dayDate)) {
                     const hour = dt.getHours();
@@ -1458,9 +1475,9 @@ import Layout from '../layouts/Layout.astro';
             group.forEach((cita, idx) => {
                 const topPx = (cita._hour - CAL_HOURS_START) * CAL_ROW_HEIGHT + (cita._minutes / 60) * CAL_ROW_HEIGHT;
                 const colors = statusColors[cita.estado] || statusColors['pendiente'];
-                const colWidth = `((100% - 60px) / 7)`;
+                const colWidth = `((100% - 50px) / 6)`;
                 const blockWidth = `calc(${colWidth} / ${count} - 3px)`;
-                const blockLeft = `calc(60px + ${cita._dayIdx} * ${colWidth} + ${idx} * (${colWidth} / ${count}) + 2px)`;
+                const blockLeft = `calc(50px + ${cita._dayIdx} * ${colWidth} + ${idx} * (${colWidth} / ${count}) + 2px)`;
                 const blockHeight = count > 1 ? CAL_ROW_HEIGHT - 6 : CAL_ROW_HEIGHT - 4;
 
                 ghtml += `<div class="absolute rounded-r-lg px-1.5 py-1 text-xs overflow-hidden cursor-pointer z-10 transition-all hover:z-30 hover:brightness-125 hover:scale-[1.03]" `;
@@ -1478,18 +1495,64 @@ import Layout from '../layouts/Layout.astro';
         });
 
         // Current time indicator
-        if (today >= calWeekStart && today <= weekEnd) {
+        if (today >= calWeekStart && today <= addDays(calWeekStart, 5)) {
             const nowHour = today.getHours();
             const nowMin = today.getMinutes();
             if (nowHour >= CAL_HOURS_START && nowHour < CAL_HOURS_END) {
                 const nowTop = (nowHour - CAL_HOURS_START) * CAL_ROW_HEIGHT + (nowMin / 60) * CAL_ROW_HEIGHT;
-                ghtml += `<div class="absolute h-0.5 bg-red-500 z-20" style="top:${nowTop}px; left:60px; right:0;"></div>`;
-                ghtml += `<div class="absolute w-3 h-3 bg-red-500 rounded-full z-20" style="top:${nowTop - 5}px; left:57px;"></div>`;
+                ghtml += `<div class="absolute h-0.5 bg-red-500 z-20" style="top:${nowTop}px; left:50px; right:0;"></div>`;
+                ghtml += `<div class="absolute w-3 h-3 bg-red-500 rounded-full z-20" style="top:${nowTop - 5}px; left:47px;"></div>`;
             }
         }
 
         ghtml += '</div>';
         gridEl.innerHTML = ghtml;
+
+        // Render today's visits list in the sidebar
+        renderTodayVisits();
+    }
+
+    function renderTodayVisits() {
+        const todayVisitsEl = document.getElementById('todayVisitsList');
+        if (!todayVisitsEl) return;
+
+        const today = new Date();
+        const visits = (cache.citas || [])
+            .filter(c => isSameDay(new Date(c.fecha_hora), today))
+            .sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
+
+        if (visits.length === 0) {
+            todayVisitsEl.innerHTML = '<p class="text-gray-500 px-2 py-3 text-center">No hay visitas programadas para hoy.</p>';
+            return;
+        }
+
+        todayVisitsEl.innerHTML = visits.map(c => {
+            const dt = new Date(c.fecha_hora);
+            const timeStr = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+            
+            // Icon status map
+            const icons = {
+                'pendiente': '<span class="text-gray-400">⋯</span>',
+                'completada': '<span class="text-emerald-400 font-bold">✓</span>',
+                'cancelada': '<span class="text-red-400 font-bold">✕</span>'
+            };
+            const icon = icons[c.estado] || icons['pendiente'];
+            
+            return `
+                <div class="flex items-center justify-between hover:bg-white/5 p-2 rounded cursor-pointer transition" onclick="openCitaDetail(${c.id})">
+                    <div>
+                        <div class="font-bold text-gray-200 truncate max-w-[120px]" title="${c.mascota_nombre}">${c.mascota_nombre || 'Mascota'}</div>
+                        <div class="text-gray-500 text-[10px]">${timeStr}</div>
+                    </div>
+                    <div class="flex gap-2">
+                        ${c.estado === 'pendiente' ? `
+                           <button onclick="event.stopPropagation(); updateCitaEstado(${c.id}, 'completada')" class="w-5 h-5 flex items-center justify-center rounded bg-gray-700/50 text-gray-400 hover:bg-emerald-500/20 hover:text-emerald-400 transition" title="Marcar completada">✓</button>
+                           <button onclick="event.stopPropagation(); openCancelReasonDialog(${c.id})" class="w-5 h-5 flex items-center justify-center rounded bg-gray-700/50 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition" title="Cancelar">✕</button>
+                        ` : icon}
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     // View cita detail on click — full CRUD
