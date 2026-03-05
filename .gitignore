@@ -1,0 +1,16 @@
+# variables de entorno
+.env
+backend/.env
+
+# node
+node_modules/
+
+# compilaciones
+bin/
+obj/
+
+# archivos de visual studio
+.vs/
+
+# logs
+*.log
