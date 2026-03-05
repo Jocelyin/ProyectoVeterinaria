@@ -1,0 +1,42 @@
+---
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="Veterinaria Test - Sistema de Gestion" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <title>{title} | Veterinaria Test</title>
+    </head>
+    <body class="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 font-['Inter',sans-serif]">
+        <!-- Header con branding -->
+        <header class="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/10">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-white">Veterinaria Test</h1>
+            </div>
+        </header>
+        
+        <div class="pt-16">
+            <slot />
+        </div>
+    </body>
+</html>
+
+<style is:global>
+    @import '../styles/global.css';
+</style>

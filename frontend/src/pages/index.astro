@@ -1,0 +1,222 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Acceso">
+    <main class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md animate-fade-in">
+            <!-- Tabs: Ingresar / Registrarse -->
+            <div class="flex mb-6 bg-white/5 rounded-xl p-1 border border-white/10">
+                <button 
+                    id="tabLogin" 
+                    class="flex-1 py-3 px-4 rounded-lg text-white font-medium transition-all duration-300 bg-gradient-to-r from-emerald-600 to-teal-600"
+                >
+                    Ingresar
+                </button>
+                <button 
+                    id="tabRegister" 
+                    class="flex-1 py-3 px-4 rounded-lg text-gray-400 font-medium transition-all duration-300 hover:text-white"
+                >
+                    Registrar Veterinaria
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginSection" class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-2">Iniciar Sesion</h2>
+                    <p class="text-gray-400">Accede a tu cuenta de Veterinaria</p>
+                </div>
+
+                <form id="loginForm" class="space-y-5">
+                    <div>
+                        <label for="loginUsername" class="block text-sm font-medium text-gray-200 mb-2">Usuario</label>
+                        <input type="text" id="loginUsername" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Usuario" />
+                    </div>
+
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-200 mb-2">Contrasena</label>
+                        <input type="password" id="loginPassword" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Contrasena" />
+                    </div>
+
+                    <div id="loginError" class="hidden p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300 text-sm"></div>
+
+                    <button type="submit" id="loginBtn"
+                        class="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]">
+                        Ingresar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerSection" class="hidden bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-white mb-2">Alta de Veterinaria</h2>
+                    <p class="text-gray-400">Registra una nueva cuenta</p>
+                </div>
+
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="regNombreVeterinaria" class="block text-sm font-medium text-gray-200 mb-2">Nombre de la Veterinaria</label>
+                        <input type="text" id="regNombreVeterinaria" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Ej: Veterinaria San Roque" />
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="regUsername" class="block text-sm font-medium text-gray-200 mb-2">Usuario</label>
+                            <input type="text" id="regUsername" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                placeholder="Usuario admin" />
+                        </div>
+                        <div>
+                            <label for="regPassword" class="block text-sm font-medium text-gray-200 mb-2">Contrasena</label>
+                            <input type="password" id="regPassword" required
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                                placeholder="******" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="regDireccion" class="block text-sm font-medium text-gray-200 mb-2">Direccion / Ubicacion</label>
+                        <input type="text" id="regDireccion" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Direccion completa" />
+                    </div>
+
+                    <div>
+                        <label for="regTelefono" class="block text-sm font-medium text-gray-200 mb-2">Telefono</label>
+                        <input type="tel" id="regTelefono" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="Telefono de contacto" />
+                    </div>
+
+                    <div>
+                        <label for="regEmail" class="block text-sm font-medium text-gray-200 mb-2">Correo Electronico</label>
+                        <input type="email" id="regEmail" required
+                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                            placeholder="contacto@veterinaria.com" />
+                    </div>
+
+                    <div id="registerError" class="hidden p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300 text-sm"></div>
+                    <div id="registerSuccess" class="hidden p-4 bg-green-500/20 border border-green-500/50 rounded-xl text-green-300 text-sm"></div>
+
+                    <button type="submit" id="registerBtn"
+                        class="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]">
+                        Registrar Veterinaria
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-gray-500 text-sm mt-6">
+                2026 Veterinaria Test. Todos los derechos reservados.
+            </p>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    const API_URL = 'http://localhost:8000';
+
+    if (localStorage.getItem('access_token')) {
+        window.location.href = '/welcome';
+    }
+
+    const tabLogin = document.getElementById('tabLogin')!;
+    const tabRegister = document.getElementById('tabRegister')!;
+    const loginSection = document.getElementById('loginSection')!;
+    const registerSection = document.getElementById('registerSection')!;
+
+    function switchTab(mode: 'login' | 'register') {
+        if (mode === 'login') {
+            tabLogin.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white');
+            tabLogin.classList.remove('text-gray-400');
+            tabRegister.classList.remove('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white');
+            tabRegister.classList.add('text-gray-400');
+            loginSection.classList.remove('hidden');
+            registerSection.classList.add('hidden');
+        } else {
+            tabRegister.classList.add('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white');
+            tabRegister.classList.remove('text-gray-400');
+            tabLogin.classList.remove('bg-gradient-to-r', 'from-emerald-600', 'to-teal-600', 'text-white');
+            tabLogin.classList.add('text-gray-400');
+            registerSection.classList.remove('hidden');
+            loginSection.classList.add('hidden');
+        }
+    }
+
+    tabLogin.addEventListener('click', () => switchTab('login'));
+    tabRegister.addEventListener('click', () => switchTab('register'));
+
+    // Login Logic
+    const loginForm = document.getElementById('loginForm') as HTMLFormElement;
+    const loginError = document.getElementById('loginError')!;
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.classList.add('hidden');
+        const username = (document.getElementById('loginUsername') as HTMLInputElement).value;
+        const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
+
+        try {
+            const response = await fetch(`${API_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || 'Error de autenticacion');
+            }
+            const data = await response.json();
+            localStorage.setItem('access_token', data.access_token);
+            window.location.href = '/welcome';
+        } catch (error) {
+            loginError.textContent = error instanceof Error ? error.message : 'Error';
+            loginError.classList.remove('hidden');
+        }
+    });
+
+    // Register Logic
+    const registerForm = document.getElementById('registerForm') as HTMLFormElement;
+    const registerError = document.getElementById('registerError')!;
+    const registerSuccess = document.getElementById('registerSuccess')!;
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        registerError.classList.add('hidden');
+        
+        const userData = {
+            username: (document.getElementById('regUsername') as HTMLInputElement).value,
+            password: (document.getElementById('regPassword') as HTMLInputElement).value,
+            nombre_veterinaria: (document.getElementById('regNombreVeterinaria') as HTMLInputElement).value,
+            direccion: (document.getElementById('regDireccion') as HTMLInputElement).value,
+            telefono: (document.getElementById('regTelefono') as HTMLInputElement).value,
+            email: (document.getElementById('regEmail') as HTMLInputElement).value,
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/api/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData),
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || 'Error al registrar');
+            }
+            registerSuccess.textContent = 'Veterinaria registrada exitosamente. Inicie sesion.';
+            registerSuccess.classList.remove('hidden');
+            registerForm.reset();
+            setTimeout(() => switchTab('login'), 2000);
+        } catch (error) {
+            registerError.textContent = error instanceof Error ? error.message : 'Error';
+            registerError.classList.remove('hidden');
+        }
+    });
+</script>
