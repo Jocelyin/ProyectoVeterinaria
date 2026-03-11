@@ -36,23 +36,30 @@ import ReportForm from '../components/ReportForm.jsx';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-11">
                 <div id="navTabs" class="flex items-center gap-1">
-                    <button onclick="navigateTo('dashboard')" data-tab="dashboard" class="nav-tab nav-tab-active px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200">Inicio</button>
-                    <button onclick="navigateTo('citas')" data-tab="citas" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10">Citas</button>
+                    <button onclick="navigateTo('citas')" data-tab="citas" class="nav-tab nav-tab-active px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200">Citas</button>
                     <button onclick="navigateTo('clientes')" data-tab="clientes" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10">Clientes</button>
                     <button onclick="navigateTo('mascotas')" data-tab="mascotas" class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-white/70 hover:text-white hover:bg-white/10">Mascotas</button>
+                    <button onclick="openSettingsModal()" id="configDropdownBtn" class="nav-tab flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
+                        Configuraci&oacute;n
+                    </button>
                 </div>
-                <!-- Config Button -->
-                <button onclick="openSettingsModal()" id="configDropdownBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
-                    Configuraci&oacute;n
-                </button>
+                <!-- Search Bar -->
+                <div class="flex items-center bg-white/10 hover:bg-white/15 rounded-full px-3 py-1.5 gap-2 transition-colors w-44">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/60 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" id="globalSearchInput" placeholder="Buscar..." 
+                        class="bg-transparent border-none text-white placeholder-white/50 text-sm focus:outline-none w-full"
+                        oninput="handleGlobalSearch(this.value)" />
+                </div>
             </div>
         </div>
     </div>
 
     <main class="pt-32 pb-12 px-4 max-w-7xl mx-auto">
-        <!-- Header Dinámico -->
-        <div class="mb-8 flex justify-between items-center">
+        <!-- Header Dinámico (hidden - each tab already has its name) -->
+        <div class="mb-0 flex justify-between items-center" style="display:none;">
             <div>
                 <h1 id="pageTitle" class="text-3xl font-bold text-white mb-2">Panel Principal</h1>
                 <p id="pageSubtitle" class="text-gray-400">Bienvenido a su sistema de gestión</p>
@@ -128,33 +135,34 @@ import ReportForm from '../components/ReportForm.jsx';
                         </button>
                         <h2 id="calWeekTitle" class="text-lg font-bold text-white ml-2"></h2>
                     </div>
+                    <!-- Legend inline -->
+                    <div class="flex items-center gap-4 text-xs">
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span><span class="text-gray-400">Pendiente</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span><span class="text-gray-400">Completada</span></div>
+                        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span><span class="text-gray-400">Cancelada</span></div>
+                    </div>
                 </div>
 
-                <!-- Main Content: Calendar Grid + Right Sidebar -->
+                <!-- Main Content: Left Sidebar + Calendar -->
                 <div class="flex gap-4">
-                    <!-- Main Calendar Grid -->
-                    <div class="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                        <!-- Day Headers -->
-                        <div class="grid grid-cols-[50px_repeat(6,1fr)] border-b border-white/10">
-                            <div class="p-2"></div>
-                            <div id="calDayHeaders" class="contents"></div>
+                    <!-- Left Sidebar: Citas de Hoy -->
+                    <div style="width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Citas de Hoy Card -->
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; padding: 1.25rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: 700; color: #fff;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;color:#60a5fa;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    Citas de hoy
+                                </div>
+                                <span id="todayVisitsCount" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:50%;background:rgba(59,130,246,0.2);color:#60a5fa;font-size:0.8rem;font-weight:700;">0</span>
+                            </div>
+                            <div id="todayVisitsList" style="display:flex;flex-direction:column;gap:0.4rem;max-height:calc(100vh - 380px);overflow-y:auto;">
+                                <!-- Injected by JS -->
+                            </div>
                         </div>
-                        <!-- Time Grid -->
-                        <div id="calendarGrid" class="relative overflow-y-auto" style="max-height: 600px;">
-                            <!-- Rows injected by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Right Sidebar -->
-                    <div class="w-64 flex-shrink-0 space-y-4">
-                        <!-- Nueva Cita Button -->
-                        <button onclick="openCreateCitaModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-2xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            + Nueva Cita
-                        </button>
 
                         <!-- Mini Calendar -->
-                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+                        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; padding: 1.25rem;">
                             <div class="flex items-center justify-between mb-3">
                                 <button onclick="miniCalNav(-1)" class="text-gray-400 hover:text-white p-1 rounded hover:bg-white/10 transition-colors">&lt;</button>
                                 <span id="miniCalTitle" class="text-sm font-bold text-white"></span>
@@ -171,30 +179,55 @@ import ReportForm from '../components/ReportForm.jsx';
                             </div>
                             <div id="miniCalDays" class="grid grid-cols-7 gap-0 text-center text-xs"></div>
                         </div>
+                    </div>
 
-                        <!-- Visitas de hoy -->
-                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                <span class="text-emerald-400">▽</span> Visitas de hoy
-                            </h4>
-                            <div id="todayVisitsList" class="space-y-2 text-xs max-h-[300px] overflow-y-auto">
-                                <!-- Injected by JS -->
-                            </div>
+                    <!-- Main Calendar Grid -->
+                    <div class="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                        <!-- Day Headers -->
+                        <div class="grid grid-cols-[50px_repeat(6,1fr)] border-b border-white/10">
+                            <div class="p-2"></div>
+                            <div id="calDayHeaders" class="contents"></div>
                         </div>
-
-                        <!-- Legend -->
-                        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Estado</h4>
-                            <div class="space-y-2 text-xs">
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-500"></span><span class="text-gray-300">Pendiente</span></div>
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span><span class="text-gray-300">Completada</span></div>
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-500"></span><span class="text-gray-300">Cancelada</span></div>
-                            </div>
+                        <!-- Time Grid -->
+                        <div id="calendarGrid" class="relative overflow-y-auto" style="max-height: 600px;">
+                            <!-- Rows injected by JS -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- FAB Button -->
+        <button id="citaFabBtn" onclick="toggleCitaDrawer()"
+            style="display:none; position:fixed; bottom:2rem; right:2rem; width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border:none; cursor:pointer; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(37,99,235,0.4); z-index:80; transition:all 0.3s cubic-bezier(0.4,0,0.2,1);">
+            <svg id="citaFabIcon" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;transition:transform 0.3s;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+        </button>
+
+        <!-- Drawer Overlay -->
+        <div id="citaDrawerOverlay" onclick="toggleCitaDrawer()"
+            style="position:fixed; inset:0; z-index:90; background:rgba(0,0,0,0.35); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity 0.3s ease;">
+        </div>
+
+        <!-- Cita Creation Drawer -->
+        <div id="citaDrawer"
+            style="position:fixed; top:0; right:0; width:420px; height:100vh; background:#0f172a; border-left:1px solid rgba(255,255,255,0.08); box-shadow:-8px 0 30px rgba(0,0,0,0.4); transform:translateX(100%); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1); z-index:95; display:flex; flex-direction:column; overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1.15rem 1.5rem; border-bottom:1px solid rgba(255,255,255,0.08); flex-shrink:0; background:rgba(0,0,0,0.2);">
+                <h3 style="font-size:1.1rem; font-weight:700; color:white; display:flex; align-items:center; gap:0.5rem; margin:0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;color:#60a5fa;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Nueva Cita
+                </h3>
+                <button onclick="toggleCitaDrawer()" style="padding:0.4rem; border-radius:0.5rem; background:none; border:none; color:#9ca3af; cursor:pointer; transition:all 0.15s;">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="citaDrawerBody" style="flex:1; overflow-y:auto; padding:1.25rem 1.5rem;">
+                <!-- Form injected by JS -->
+            </div>
+        </div>
+
+
 
         <!-- 5. VIEW: ADMIN DASHBOARD -->
         <div id="viewAdmin" class="hidden">
@@ -1262,6 +1295,16 @@ import ReportForm from '../components/ReportForm.jsx';
             activeTab.classList.remove('text-white/70', 'hover:text-white', 'hover:bg-white/10');
         }
 
+        // Show/hide FAB button
+        const fabBtn = document.getElementById('citaFabBtn');
+        if (fabBtn) {
+            if (viewName === 'citas') fabBtn.style.display = 'flex';
+            else {
+                fabBtn.style.display = 'none';
+                closeCitaDrawer();
+            }
+        }
+
         // Update Title & Load Data
         const titleEl = document.getElementById('pageTitle');
         const subtitleEl = document.getElementById('pageSubtitle');
@@ -1290,6 +1333,45 @@ import ReportForm from '../components/ReportForm.jsx';
             loadAdminData();
         }
     };
+
+    // --- Cita Drawer Toggle ---
+    let citaDrawerOpen = false;
+
+    window.toggleCitaDrawer = (prefillDateTime = null) => {
+        if (citaDrawerOpen) {
+            closeCitaDrawer();
+        } else {
+            openCitaDrawer(prefillDateTime);
+        }
+    };
+
+    function openCitaDrawer(prefillDateTime = null) {
+        citaDrawerOpen = true;
+        const drawer = document.getElementById('citaDrawer');
+        const overlay = document.getElementById('citaDrawerOverlay');
+        const fabBtn = document.getElementById('citaFabBtn');
+        const fabIcon = document.getElementById('citaFabIcon');
+
+        if (drawer) drawer.style.transform = 'translateX(0)';
+        if (overlay) { overlay.style.opacity = '1'; overlay.style.pointerEvents = 'auto'; }
+        if (fabBtn) { fabBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)'; fabBtn.style.boxShadow = '0 6px 20px rgba(239,68,68,0.4)'; }
+        if (fabIcon) fabIcon.style.transform = 'rotate(45deg)';
+
+        populateCitaDrawerForm(prefillDateTime);
+    }
+
+    function closeCitaDrawer() {
+        citaDrawerOpen = false;
+        const drawer = document.getElementById('citaDrawer');
+        const overlay = document.getElementById('citaDrawerOverlay');
+        const fabBtn = document.getElementById('citaFabBtn');
+        const fabIcon = document.getElementById('citaFabIcon');
+
+        if (drawer) drawer.style.transform = 'translateX(100%)';
+        if (overlay) { overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none'; }
+        if (fabBtn) { fabBtn.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)'; fabBtn.style.boxShadow = '0 6px 20px rgba(37,99,235,0.4)'; }
+        if (fabIcon) fabIcon.style.transform = 'rotate(0deg)';
+    }
 
     // --- Loaders ---
     async function loadMascotas() {
@@ -1642,6 +1724,7 @@ import ReportForm from '../components/ReportForm.jsx';
 
     function renderTodayVisits() {
         const todayVisitsEl = document.getElementById('todayVisitsList');
+        const countBadge = document.getElementById('todayVisitsCount');
         if (!todayVisitsEl) return;
 
         const today = new Date();
@@ -1649,35 +1732,38 @@ import ReportForm from '../components/ReportForm.jsx';
             .filter(c => isSameDay(new Date(c.fecha_hora), today))
             .sort((a, b) => new Date(a.fecha_hora) - new Date(b.fecha_hora));
 
+        // Update count badge
+        if (countBadge) countBadge.textContent = visits.length;
+
         if (visits.length === 0) {
-            todayVisitsEl.innerHTML = '<p class="text-gray-500 px-2 py-3 text-center">No hay visitas programadas para hoy.</p>';
+            todayVisitsEl.innerHTML = '<div style="text-align:center; padding:1.5rem 0;"><p style="color:#6b7280; font-size:0.875rem;">No hay citas programadas para hoy</p><p style="color:#4b5563; font-size:0.75rem; margin-top:0.25rem;">Las citas aparecerán aquí</p></div>';
             return;
         }
+
+        const statusColorMap = { pendiente: '#3b82f6', completada: '#10b981', cancelada: '#ef4444' };
 
         todayVisitsEl.innerHTML = visits.map(c => {
             const dt = new Date(c.fecha_hora);
             const timeStr = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-            
-            // Icon status map
-            const icons = {
-                'pendiente': '<span class="text-gray-400">⋯</span>',
-                'completada': '<span class="text-emerald-400 font-bold">✓</span>',
-                'cancelada': '<span class="text-red-400 font-bold">✕</span>'
-            };
-            const icon = icons[c.estado] || icons['pendiente'];
-            
+            const estado = c.estado || 'pendiente';
+            const dotColor = statusColorMap[estado] || statusColorMap.pendiente;
+
+            // Extract motivo (clean up doctor info)
+            let motivoShort = c.motivo || 'Consulta';
+            const bracketIdx = motivoShort.indexOf('[');
+            if (bracketIdx > 0) motivoShort = motivoShort.substring(0, bracketIdx).trim();
+
             return `
-                <div class="flex items-center justify-between hover:bg-white/5 p-2 rounded cursor-pointer transition" onclick="openCitaDetail(${c.id})">
-                    <div>
-                        <div class="font-bold text-gray-200 truncate max-w-[120px]" title="${c.mascota_nombre}">${c.mascota_nombre || 'Mascota'}</div>
-                        <div class="text-gray-500 text-[10px]">${timeStr}</div>
+                <div style="display:flex; align-items:center; gap:0.65rem; padding:0.6rem 0.75rem; border-radius:0.6rem; cursor:pointer; transition:background 0.15s; border:1px solid transparent;"
+                     onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.08)';"
+                     onmouseout="this.style.background='transparent'; this.style.borderColor='transparent';"
+                     onclick="openCitaDetail(${c.id})">
+                    <span style="font-size:0.7rem; font-weight:700; color:#60a5fa; background:rgba(59,130,246,0.12); padding:0.2rem 0.5rem; border-radius:0.35rem; min-width:45px; text-align:center; flex-shrink:0;">${timeStr}</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.8rem; font-weight:600; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.mascota_nombre || 'Mascota'}</div>
+                        <div style="font-size:0.7rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.cliente_nombre || ''} · ${motivoShort}</div>
                     </div>
-                    <div class="flex gap-2">
-                        ${c.estado === 'pendiente' ? `
-                           <button onclick="event.stopPropagation(); updateCitaEstado(${c.id}, 'completada')" class="w-5 h-5 flex items-center justify-center rounded bg-gray-700/50 text-gray-400 hover:bg-emerald-500/20 hover:text-emerald-400 transition" title="Marcar completada">✓</button>
-                           <button onclick="event.stopPropagation(); openCancelReasonDialog(${c.id})" class="w-5 h-5 flex items-center justify-center rounded bg-gray-700/50 text-gray-400 hover:bg-red-500/20 hover:text-red-400 transition" title="Cancelar">✕</button>
-                        ` : icon}
-                    </div>
+                    <span style="width:8px; height:8px; border-radius:50%; flex-shrink:0; background:${dotColor};"></span>
                 </div>
             `;
         }).join('');
@@ -2396,9 +2482,21 @@ import ReportForm from '../components/ReportForm.jsx';
 
     // --- Citas Logic (Calendar-aware) ---
     window.openCreateCitaModal = (prefillDateTime = null) => {
+        // Open the drawer (which will call populateCitaDrawerForm)
+        if (!citaDrawerOpen) {
+            openCitaDrawer(prefillDateTime);
+        } else {
+            // Already open — just re-populate with new prefill
+            populateCitaDrawerForm(prefillDateTime);
+        }
+    };
+
+    function populateCitaDrawerForm(prefillDateTime = null) {
          // Ensure data loaded
          if (cache.mascotas.length === 0) { loadMascotas(); }
          if (cache.clientes.length === 0) { loadClientes(); }
+
+         const drawerBody = document.getElementById('citaDrawerBody');
 
          // --- Date helpers ---
          const today = new Date();
@@ -2434,8 +2532,12 @@ import ReportForm from '../components/ReportForm.jsx';
              return `${turnoInfo.label || v.turno} (${turnoInfo.inicio || '?'}:00–${turnoInfo.fin || '?'}:00)`;
          }
 
-         modalContent.innerHTML = `
-            <h2 class="text-xl font-bold text-white mb-4">Agendar Cita</h2>
+         drawerBody.innerHTML = `
+            <div class="mb-4">
+                <style>
+                    /* Hide scrollbar for drawer body specifically if needed, although global handles it */
+                </style>
+            </div>
             <form id="createCitaForm" class="space-y-4">
                  <!-- 1. PROPIETARIO -->
                  <div>
@@ -2576,10 +2678,9 @@ import ReportForm from '../components/ReportForm.jsx';
                         class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-gray-600 resize-none"></textarea>
                 </div>
 
-                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-2">Agendar Cita</button>
+                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg mt-2 transition-colors shadow-lg shadow-blue-500/20">Guardar Cita</button>
              </form>
          `;
-         modal.classList.remove('hidden');
 
          // ===== OWNER SEARCH LOGIC =====
          const ownerSearchInput = document.getElementById('ownerSearchInput');
@@ -3001,7 +3102,7 @@ import ReportForm from '../components/ReportForm.jsx';
                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                      body: JSON.stringify(payload)
                  });
-                 if(res.ok) { closeModal(); await initCalendar(); }
+                 if(res.ok) { closeCitaDrawer(); await initCalendar(); }
                  else alert('Error al agendar');
              } catch(err) { console.error(err); }
          };
@@ -3039,7 +3140,7 @@ import ReportForm from '../components/ReportForm.jsx';
         // Redirect based on role
         const role = document.getElementById('userRoleDisplay').textContent;
         if (role === 'admin') navigateTo('admin');
-        else navigateTo('dashboard');
+        else navigateTo('citas');
     };
 
     document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('access_token'); window.location.href = '/'; };
@@ -3054,10 +3155,8 @@ import ReportForm from '../components/ReportForm.jsx';
             // Logic for initial view
             if (u.role === 'admin') {
                 navigateTo('admin');
-                // Hide nav to standard dashboard if admin logic requires strictly admin view only
-                 // For now, we just redirect. 
             } else {
-                navigateTo('dashboard');
+                navigateTo('citas');
             }
         })
         .catch(() => {
@@ -3065,5 +3164,18 @@ import ReportForm from '../components/ReportForm.jsx';
              localStorage.removeItem('access_token');
              window.location.href = '/';
         });
+
+    // --- Global Search ---
+    window.handleGlobalSearch = (query) => {
+        const q = query.trim().toLowerCase();
+        if (!q) return;
+        // Navigate to clientes and filter
+        navigateTo('clientes');
+        const input = document.getElementById('clientSearchInput');
+        if (input) {
+            input.value = query;
+            filterClientes();
+        }
+    };
 
 </script>
