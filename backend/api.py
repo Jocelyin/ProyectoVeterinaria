@@ -1,8 +1,11 @@
-from datetime import timedelta
-from typing import List
-from fastapi import FastAPI, Depends, HTTPException, status
+from datetime import timedelta, datetime
+from typing import List, Optional
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
+from pydantic import BaseModel
+import io
 
 from database import engine, get_db, Base
 import models
@@ -584,6 +587,273 @@ def delete_cita(
     db.delete(cita)
     db.commit()
     return {"message": "Cita eliminada"}
+
+
+# === REPORTES ===
+
+class ReportRequest(BaseModel):
+    tipo: str  # "citas", "clientes", "pacientes"
+    fecha_inicio: str  # "YYYY-MM-DD"
+    fecha_fin: str  # "YYYY-MM-DD"
+    formato: str  # "pdf" or "excel"
+
+@app.post("/api/reports")
+def generate_report(
+    report_req: ReportRequest,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generar reporte de Citas, Clientes o Pacientes en PDF o Excel"""
+    if current_user.role == "admin":
+        raise HTTPException(status_code=403, detail="Los administradores no generan reportes de veterinaria")
+
+    try:
+        fecha_inicio = datetime.strptime(report_req.fecha_inicio, "%Y-%m-%d")
+        fecha_fin = datetime.strptime(report_req.fecha_fin, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de fecha inválido. Use YYYY-MM-DD")
+
+    if fecha_inicio > fecha_fin:
+        raise HTTPException(status_code=400, detail="La fecha inicio no puede ser mayor a la fecha fin")
+
+    tipo = report_req.tipo.lower()
+    formato = report_req.formato.lower()
+
+    # --- Gather data ---
+    headers = []
+    rows = []
+    title = ""
+
+    if tipo == "citas":
+        title = "Reporte de Citas"
+        headers = ["ID", "Fecha y Hora", "Motivo", "Estado", "Cliente", "Mascota"]
+        citas = (
+            db.query(models.Cita)
+            .filter(
+                models.Cita.veterinaria_id == current_user.id,
+                models.Cita.fecha_hora >= fecha_inicio,
+                models.Cita.fecha_hora <= fecha_fin
+            )
+            .options(joinedload(models.Cita.cliente), joinedload(models.Cita.mascota))
+            .order_by(models.Cita.fecha_hora)
+            .all()
+        )
+        for c in citas:
+            rows.append([
+                str(c.id),
+                c.fecha_hora.strftime("%d/%m/%Y %H:%M") if c.fecha_hora else "",
+                c.motivo or "",
+                c.estado or "",
+                c.cliente.nombre if c.cliente else "—",
+                c.mascota.nombre if c.mascota else "—"
+            ])
+
+    elif tipo == "clientes":
+        title = "Reporte de Clientes"
+        headers = ["ID", "Nombre", "Teléfono", "Email", "Dirección", "Fecha Registro", "Nº Mascotas"]
+        clientes = (
+            db.query(models.Cliente)
+            .filter(
+                models.Cliente.veterinaria_id == current_user.id,
+                models.Cliente.created_at >= fecha_inicio,
+                models.Cliente.created_at <= fecha_fin
+            )
+            .options(joinedload(models.Cliente.mascotas))
+            .order_by(models.Cliente.nombre)
+            .all()
+        )
+        for cl in clientes:
+            rows.append([
+                str(cl.id),
+                cl.nombre or "",
+                cl.telefono or "",
+                cl.email or "",
+                cl.direccion or "",
+                cl.created_at.strftime("%d/%m/%Y") if cl.created_at else "",
+                str(len(cl.mascotas)) if cl.mascotas else "0"
+            ])
+
+    elif tipo == "pacientes":
+        title = "Reporte de Pacientes"
+        headers = ["ID", "Nombre", "Especie", "Raza", "Edad", "Peso", "Sexo", "Propietario"]
+        mascotas = (
+            db.query(models.Mascota)
+            .join(models.Cliente)
+            .filter(
+                models.Cliente.veterinaria_id == current_user.id,
+                models.Cliente.created_at >= fecha_inicio,
+                models.Cliente.created_at <= fecha_fin
+            )
+            .options(joinedload(models.Mascota.cliente))
+            .order_by(models.Mascota.nombre)
+            .all()
+        )
+        for m in mascotas:
+            rows.append([
+                str(m.id),
+                m.nombre or "",
+                m.especie or "",
+                m.raza or "",
+                m.edad or "",
+                m.peso or "",
+                m.sexo or "",
+                m.cliente.nombre if m.cliente else "—"
+            ])
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de reporte inválido. Use: citas, clientes, pacientes")
+
+    vet_name = current_user.nombre_veterinaria or "Veterinaria"
+    subtitle = f"{report_req.fecha_inicio} al {report_req.fecha_fin}"
+
+    # --- Generate file ---
+    try:
+        if formato == "excel":
+            return _generate_excel(title, subtitle, vet_name, headers, rows, tipo)
+        elif formato == "pdf":
+            return _generate_pdf(title, subtitle, vet_name, headers, rows, tipo)
+        else:
+            raise HTTPException(status_code=400, detail="Formato inválido. Use: pdf, excel")
+    except Exception as e:
+        import traceback
+        with open("pdf_error.txt", "w") as f:
+            f.write(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _generate_excel(title, subtitle, vet_name, headers, rows, tipo):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = title
+
+    # Title row
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    title_cell = ws.cell(row=1, column=1, value=f"{vet_name} — {title}")
+    title_cell.font = Font(bold=True, size=14, color="FFFFFF")
+    title_cell.fill = PatternFill(start_color="059669", end_color="059669", fill_type="solid")
+    title_cell.alignment = Alignment(horizontal="center")
+
+    # Subtitle row
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=len(headers))
+    sub_cell = ws.cell(row=2, column=1, value=f"Período: {subtitle}")
+    sub_cell.font = Font(size=10, italic=True, color="666666")
+    sub_cell.alignment = Alignment(horizontal="center")
+
+    # Headers
+    header_fill = PatternFill(start_color="111827", end_color="111827", fill_type="solid")
+    header_font = Font(bold=True, color="10B981", size=10)
+    thin_border = Border(
+        bottom=Side(style='thin', color='333333')
+    )
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col_idx, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center")
+
+    # Data rows
+    for row_idx, row_data in enumerate(rows, 5):
+        for col_idx, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell.font = Font(size=10)
+            cell.alignment = Alignment(horizontal="center")
+
+    # Auto-width
+    for col_idx in range(1, len(headers) + 1):
+        max_len = len(str(headers[col_idx - 1]))
+        for row_data in rows:
+            if col_idx - 1 < len(row_data):
+                max_len = max(max_len, len(str(row_data[col_idx - 1])))
+        ws.column_dimensions[chr(64 + col_idx) if col_idx <= 26 else 'A'].width = min(max_len + 4, 30)
+
+    # Total
+    total_row = len(rows) + 6
+    ws.cell(row=total_row, column=1, value=f"Total de registros: {len(rows)}").font = Font(bold=True, size=10)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"reporte_{tipo}_{subtitle.replace(' al ', '_')}.xlsx"
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+
+def _generate_pdf(title, subtitle, vet_name, headers, rows, tipo):
+    from reportlab.lib.pagesizes import letter, landscape
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+
+    buffer = io.BytesIO()
+    page_size = landscape(letter) if len(headers) > 6 else letter
+    doc = SimpleDocTemplate(buffer, pagesize=page_size, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle', parent=styles['Title'],
+        fontSize=18, textColor=colors.HexColor("#059669"), spaceAfter=6
+    )
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle', parent=styles['Normal'],
+        fontSize=10, textColor=colors.HexColor("#6b7280"), spaceAfter=20
+    )
+
+    elements.append(Paragraph(f"{vet_name} — {title}", title_style))
+    elements.append(Paragraph(f"Período: {subtitle}", subtitle_style))
+    elements.append(Spacer(1, 12))
+
+    # Table
+    table_data = [headers] + rows
+    table = Table(table_data, repeatRows=1)
+
+    table_style = TableStyle([
+        # Header
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#111827")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor("#10B981")),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # Body
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        # Alternating rows
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#f3f4f6")]),
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
+    ])
+    table.setStyle(table_style)
+    elements.append(table)
+
+    # Total
+    elements.append(Spacer(1, 20))
+    total_style = ParagraphStyle(
+        'Total', parent=styles['Normal'],
+        fontSize=10, textColor=colors.HexColor("#374151")
+    )
+    elements.append(Paragraph(f"<b>Total de registros:</b> {len(rows)}", total_style))
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    filename = f"reporte_{tipo}_{subtitle.replace(' al ', '_')}.pdf"
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
 
 
 # === ADMIN ENDPOINTS ===

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import ReportForm from '../components/ReportForm.jsx';
 ---
 
 <Layout title="Panel de Veterinaria">
@@ -256,6 +257,10 @@ import Layout from '../layouts/Layout.astro';
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         Veterinarios
                     </button>
+                    <button onclick="switchSettingsTab('reportes')" data-settings-tab="reportes" class="settings-sidebar-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Reportes
+                    </button>
                 </div>
                 <!-- Content -->
                 <div class="settings-content">
@@ -385,6 +390,10 @@ import Layout from '../layouts/Layout.astro';
                         <!-- Vet List -->
                         <div id="vetListContainer" class="settings-vet-list"></div>
                     </div>
+                    <!-- Reportes Panel -->
+                    <div id="settingsReportes" class="settings-panel hidden">
+                        <ReportForm client:load />
+                    </div>
                 </div>
             </div>
         </div>
@@ -412,12 +421,17 @@ import Layout from '../layouts/Layout.astro';
     const MAX_VETERINARIOS = 10;
 
     // --- Veterinarios ---
+    // tipo: 'general' = atiende consultas básicas (chequeo, vacunación, desparasitación, control embarazo)
+    // tipo: 'especialista' = atiende cirugías, dermatología, urgencias, etc.
     const VETERINARIOS = [
+        // ===== TURNO MATUTINO (9:00 – 15:00) =====
+        // -- Especialistas --
         {
             id: 1,
             nombre: 'Dr. Martínez Zaragoza Juan',
             especialidad: 'Cirugía General',
             subespecialidad: 'Ortopedia',
+            tipo: 'especialista',
             cedula: '12345678',
             universidad: 'UNAM',
             experiencia: 12,
@@ -434,6 +448,7 @@ import Layout from '../layouts/Layout.astro';
             nombre: 'Dra. García López María',
             especialidad: 'Medicina Interna',
             subespecialidad: 'Cardiología veterinaria',
+            tipo: 'especialista',
             cedula: '87654321',
             universidad: 'UAT',
             experiencia: 8,
@@ -445,11 +460,66 @@ import Layout from '../layouts/Layout.astro';
             foto: '',
             fechaRegistro: '2025-03-10'
         },
+        // -- Generales --
+        {
+            id: 5,
+            nombre: 'Dr. Ramírez Soto Pedro',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '55667788',
+            universidad: 'UANL',
+            experiencia: 6,
+            colegiado: 'COL-078',
+            telefono: '+52 8155667788',
+            turno: 'matutino',
+            consultorio: 'C',
+            descanso: 12,
+            foto: '',
+            fechaRegistro: '2025-04-01'
+        },
+        {
+            id: 6,
+            nombre: 'Dra. Flores Vega Laura',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '99887766',
+            universidad: 'UAT',
+            experiencia: 4,
+            colegiado: '',
+            telefono: '+52 8199887766',
+            turno: 'matutino',
+            consultorio: 'E',
+            descanso: 13,
+            foto: '',
+            fechaRegistro: '2025-05-15'
+        },
+        {
+            id: 7,
+            nombre: 'Dr. López Castro Miguel',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '33445566',
+            universidad: 'UNAM',
+            experiencia: 7,
+            colegiado: 'COL-102',
+            telefono: '+52 8133445566',
+            turno: 'matutino',
+            consultorio: 'F',
+            descanso: 14,
+            foto: '',
+            fechaRegistro: '2025-07-20'
+        },
+        // ===== TURNO VESPERTINO (15:00 – 21:00) =====
+        // -- Especialistas --
         {
             id: 3,
             nombre: 'Dr. Hernández Rivera Carlos',
             especialidad: 'Dermatología',
             subespecialidad: '',
+            tipo: 'especialista',
             cedula: '11223344',
             universidad: 'UANL',
             experiencia: 5,
@@ -466,6 +536,7 @@ import Layout from '../layouts/Layout.astro';
             nombre: 'Dra. Torres Ruiz Ana Sofía',
             especialidad: 'Pediatría Animal',
             subespecialidad: 'Neonatología',
+            tipo: 'especialista',
             cedula: '44332211',
             universidad: 'ITESM',
             experiencia: 3,
@@ -476,19 +547,80 @@ import Layout from '../layouts/Layout.astro';
             descanso: 17,
             foto: '',
             fechaRegistro: '2026-01-05'
+        },
+        // -- Generales --
+        {
+            id: 8,
+            nombre: 'Dr. Morales Díaz Roberto',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '77889900',
+            universidad: 'UANL',
+            experiencia: 5,
+            colegiado: 'COL-089',
+            telefono: '+52 8177889900',
+            turno: 'vespertino',
+            consultorio: 'C',
+            descanso: 18,
+            foto: '',
+            fechaRegistro: '2025-09-01'
+        },
+        {
+            id: 9,
+            nombre: 'Dra. Castillo Reyes Patricia',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '11002233',
+            universidad: 'UAT',
+            experiencia: 3,
+            colegiado: '',
+            telefono: '+52 8111002233',
+            turno: 'vespertino',
+            consultorio: 'E',
+            descanso: 19,
+            foto: '',
+            fechaRegistro: '2025-10-15'
+        },
+        {
+            id: 10,
+            nombre: 'Dr. Navarro Peña Alejandro',
+            especialidad: 'Veterinaria General',
+            subespecialidad: '',
+            tipo: 'general',
+            cedula: '44556677',
+            universidad: 'ITESM',
+            experiencia: 2,
+            colegiado: '',
+            telefono: '+52 8144556677',
+            turno: 'vespertino',
+            consultorio: 'F',
+            descanso: 20,
+            foto: '',
+            fechaRegistro: '2026-01-20'
         }
     ];
+
+    // Motivos que atiende un veterinario general
+    const MOTIVOS_GENERALES = [
+        'Chequeo general',
+        'Vacunación',
+        'Desparasitación',
+        'Control de embarazo'
+    ];
+    // Todo lo demás (Cirugía, Consulta dermatológica, Urgencia, otro) → especialista
 
     // --- Horario de la veterinaria ---
     // 0=Domingo, 1=Lunes, ..., 6=Sábado
     const HORARIO_VETERINARIA = {
         0: null,                       // Domingo: cerrado
-        1: { inicio: 10, fin: 21 },   // Lunes
-        2: { inicio: 10, fin: 21 },   // Martes
-        3: { inicio: 10, fin: 21 },   // Miércoles
-        4: { inicio: 10, fin: 21 },   // Jueves
-        5: { inicio: 10, fin: 21 },   // Viernes
-        6: { inicio: 10, fin: 17 },   // Sábado
+        1: { inicio: 9, fin: 21 },   // Lunes
+        2: { inicio: 9, fin: 21 },   // Martes
+        3: { inicio: 9, fin: 21 },   // Miércoles
+        4: { inicio: 9, fin: 21 },   // Jueves
+        5: { inicio: 9, fin: 21 },   // Viernes
+        6: { inicio: 9, fin: 21 },   // Sábado
     };
 
     const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -571,42 +703,36 @@ import Layout from '../layouts/Layout.astro';
             slots.push({ h, m: 30, label: `${String(h).padStart(2,'0')}:30` });
         }
 
-        container.innerHTML = slots.map(s => {
+        const optionsHtml = slots.map(s => {
             const pad = (n) => String(n).padStart(2, '0');
             const dtValue = `${dateStr}T${pad(s.h)}:${pad(s.m)}`;
-            return `
-            <button type="button"
-                class="time-slot-btn text-xs font-semibold rounded-lg px-2 py-2 border border-white/10 bg-black/20 text-gray-300
-                    hover:border-blue-500 hover:bg-blue-600/20 hover:text-white transition-all duration-150"
-                data-dt="${dtValue}"
-                onclick="selectTimeSlot('${dtValue}', this)">
-                ${s.label}
-            </button>`;
+            return `<option value="${dtValue}">${s.label}</option>`;
         }).join('');
+
+        container.innerHTML = `
+            <select class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                onchange="selectTimeSlot(this.value)">
+                <option value="" disabled selected>— Selecciona una hora —</option>
+                ${optionsHtml}
+            </select>
+        `;
 
         if (noSlotsMsg) noSlotsMsg.classList.add('hidden');
         checkVetAvailability('');
     };
 
-    window.selectTimeSlot = (dtValue, btn) => {
-        // Deselect all
-        document.querySelectorAll('.time-slot-btn').forEach(b => {
-            b.classList.remove('bg-blue-600', 'border-blue-500', 'text-white', 'shadow-md', 'shadow-blue-500/20');
-            b.classList.add('bg-black/20', 'border-white/10', 'text-gray-300');
-        });
-        // Select clicked
-        btn.classList.add('bg-blue-600', 'border-blue-500', 'text-white', 'shadow-md', 'shadow-blue-500/20');
-        btn.classList.remove('bg-black/20', 'border-white/10', 'text-gray-300');
-
+    window.selectTimeSlot = (dtValue) => {
         // Update hidden field
         const hiddenFecha = document.getElementById('citaFecha');
         if (hiddenFecha) hiddenFecha.value = dtValue;
 
         // Show selected time
         const selectedSlotEl = document.getElementById('citaSelectedSlot');
-        if (selectedSlotEl) {
+        if (selectedSlotEl && dtValue) {
             const [, timePart] = dtValue.split('T');
             selectedSlotEl.textContent = `✅ Horario seleccionado: ${timePart}`;
+        } else if (selectedSlotEl) {
+            selectedSlotEl.textContent = '';
         }
 
         // Validate business hours & vet availability
@@ -822,6 +948,8 @@ import Layout from '../layouts/Layout.astro';
         } else if (tabName === 'veterinarios') {
             document.getElementById('settingsVeterinarios').classList.remove('hidden');
             renderVetList();
+        } else if (tabName === 'reportes') {
+            document.getElementById('settingsReportes').classList.remove('hidden');
         }
     };
 
@@ -1631,10 +1759,6 @@ import Layout from '../layouts/Layout.astro';
                         </button>
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="deleteCita(${cita.id})" class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-300 py-2 rounded-lg text-sm transition-colors">Eliminar Cita</button>
-                    <button onclick="closeModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg text-sm transition-colors">Cerrar</button>
-                </div>
             </div>
         `;
         modal.classList.remove('hidden');
@@ -2272,92 +2396,123 @@ import Layout from '../layouts/Layout.astro';
 
     // --- Citas Logic (Calendar-aware) ---
     window.openCreateCitaModal = (prefillDateTime = null) => {
-         // Ensure mascotas loaded for the dropdown
+         // Ensure data loaded
          if (cache.mascotas.length === 0) { loadMascotas(); }
-         const defaultDT = prefillDateTime || '';
+         if (cache.clientes.length === 0) { loadClientes(); }
 
-         // Build searchable data: combine mascota + owner + phone
-         const searchData = cache.mascotas.map(m => {
-             const client = cache.clientes.find(c => c.id === m.cliente_id);
-             const phone = client?.telefono || m.telefono_propietario || '';
-             return {
-                 id: m.id,
-                 clienteId: m.cliente_id,
-                 label: `${m.nombre_mascota} — ${m.nombre_propietario}`,
-                 sublabel: `${m.especie}${m.raza ? ' · ' + m.raza : ''} ${phone ? '· Tel: ' + phone : ''}`,
-                 searchText: `${m.nombre_mascota} ${m.nombre_propietario} ${phone}`.toLowerCase()
-             };
-         });
+         // --- Date helpers ---
+         const today = new Date();
+         today.setHours(0,0,0,0);
+         const maxDate = new Date(today);
+         maxDate.setDate(maxDate.getDate() + 60);
+
+         let selectedDate = prefillDateTime ? new Date(prefillDateTime.slice(0,10) + 'T00:00:00') : new Date(today);
+         if (selectedDate < today) selectedDate = new Date(today);
+
+         const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+         const DIAS_SEM = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+         function formatDateDisplay(d) {
+             return `${DIAS_SEM[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}, ${d.getFullYear()}`;
+         }
+         function toDateStr(d) {
+             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+         }
+
+         // Build owner searchable data
+         const ownerSearchData = cache.clientes.map(c => ({
+             id: c.id,
+             nombre: c.nombre,
+             telefono: c.telefono || '',
+             mascotasCount: (c.mascotas || []).length,
+             searchText: `${c.nombre} ${c.telefono || ''}`.toLowerCase()
+         }));
+
+         // Helper to get turno info text
+         function getVetHorarioTexto(v) {
+             const turnoInfo = TURNOS[v.turno] || {};
+             return `${turnoInfo.label || v.turno} (${turnoInfo.inicio || '?'}:00–${turnoInfo.fin || '?'}:00)`;
+         }
 
          modalContent.innerHTML = `
             <h2 class="text-xl font-bold text-white mb-4">Agendar Cita</h2>
             <form id="createCitaForm" class="space-y-4">
+                 <!-- 1. PROPIETARIO -->
                  <div>
-                    <label class="block text-gray-400 text-sm mb-1">Paciente (Mascota / Propietario)</label>
-                    <!-- Custom Searchable Selector -->
-                    <div class="relative" id="patientSearchContainer">
-                        <input type="hidden" id="citaMascotaId" name="mascota_id" value="">
-                        <input type="hidden" id="citaClienteId" value="">
-                        <div id="selectedPatientBadge" class="hidden bg-emerald-500/20 border border-emerald-500/30 rounded-lg px-4 py-2 flex items-center justify-between">
-                            <span id="selectedPatientText" class="text-emerald-300 text-sm font-medium"></span>
-                            <button type="button" onclick="clearPatientSelection()" class="text-emerald-400 hover:text-white ml-2 text-lg">&times;</button>
+                    <label class="block text-gray-400 text-sm mb-1">Propietario / Cliente</label>
+                    
+                    <div class="flex gap-2" id="ownerSearchWrapper">
+                        <div class="relative flex-1" id="ownerSearchContainer">
+                            <input type="hidden" id="citaClienteId" name="cliente_id" value="">
+                            <div id="selectedOwnerBadge" class="hidden bg-emerald-500/20 border border-emerald-500/30 rounded-lg px-4 py-2 flex items-center justify-between">
+                                <span id="selectedOwnerText" class="text-emerald-300 text-sm font-medium"></span>
+                                <button type="button" onclick="clearOwnerSelection()" class="text-emerald-400 hover:text-white ml-2 text-lg">&times;</button>
+                            </div>
+                            <input type="text" id="ownerSearchInput" placeholder="Buscar propietario por nombre o teléfono..."
+                                autocomplete="off"
+                                class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            <div id="ownerSearchResults" class="hidden absolute z-50 left-0 right-0 mt-1 bg-gray-800 border border-white/10 rounded-lg max-h-52 overflow-y-auto shadow-2xl">
+                            </div>
                         </div>
-                        <input type="text" id="patientSearchInput" placeholder="Buscar por nombre de mascota, propietario o teléfono..."
-                            autocomplete="off"
-                            class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
-                        <div id="patientSearchResults" class="hidden absolute z-50 left-0 right-0 mt-1 bg-gray-800 border border-white/10 rounded-lg max-h-52 overflow-y-auto shadow-2xl">
+                        <button type="button" onclick="showInlineClientForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-lg transition-colors flex items-center justify-center shrink-0" title="Nuevo Cliente / Mascota">
+                            + Nuevo
+                        </button>
+                    </div>
+
+                    <!-- INLINE FORM (Hidden by default) -->
+                    <div id="inlineClientFormContainer" class="hidden bg-black/40 border border-emerald-500/30 rounded-xl p-4 mt-3 space-y-3 relative">
+                        <h3 class="text-emerald-400 text-sm font-bold flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                            Registro Rápido: Cliente y Mascota
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-400 text-xs mb-1">Nombre Propietario *</label>
+                                <input type="text" id="inlineClienteNombre" placeholder="Ej: Juan Pérez" class="bg-black/20 border border-white/10 rounded-lg px-3 py-1.5 text-white w-full text-sm focus:border-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-xs mb-1">Teléfono</label>
+                                <input type="text" id="inlineClienteTelefono" placeholder="Ej: 5512345678" class="bg-black/20 border border-white/10 rounded-lg px-3 py-1.5 text-white w-full text-sm focus:border-emerald-500 outline-none">
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-gray-400 text-sm mb-2">Fecha y Hora</label>
-                    <!-- Hidden field that stores the final datetime-local value -->
-                    <input type="hidden" id="citaFecha" name="fecha_hora" value="">
-                    <!-- Step 1: Date picker -->
-                    <input type="date" id="citaDateOnly"
-                        value="${defaultDT ? defaultDT.slice(0,10) : ''}"
-                        onchange="generateTimeSlots(this.value)"
-                        class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors mb-3">
-                    <!-- Step 2: Time slot grid -->
-                    <p class="text-xs text-gray-500 mb-2">🕐 Lun–Vie: 10:00–21:00 &nbsp;·&nbsp; Sáb: 10:00–17:00 &nbsp;·&nbsp; Dom: Cerrado</p>
-                    <div id="timeSlotsContainer" class="grid grid-cols-4 gap-2">
-                        <p class="text-gray-600 text-xs col-span-4">Selecciona una fecha para ver los horarios disponibles.</p>
-                    </div>
-                    <p id="citaSelectedSlot" class="text-emerald-400 text-xs font-semibold mt-2"></p>
-                    <!-- Aviso de horario fuera de servicio -->
-                    <div id="businessHoursWarning" class="hidden mt-2 flex items-center gap-2 bg-red-500/15 border border-red-500/30 text-red-300 text-xs rounded-lg px-3 py-2">
-                    </div>
-                </div>
-                <!-- Doctor Veterinario -->
-                <div>
-                    <label class="block text-gray-400 text-sm mb-1">Doctor Veterinario</label>
-                    <input type="hidden" id="citaDoctorNombre" name="doctor_nombre" value="">
-                    <div class="grid grid-cols-2 gap-2" id="vetCardsContainer">
-                        ${VETERINARIOS.map(v => `
-                        <div class="vet-card vet-neutral relative rounded-xl border border-white/10 bg-black/20 p-3 cursor-pointer
-                            transition-all duration-200 hover:border-emerald-500/50 select-none"
-                            data-vet-id="${v.id}"
-                            onclick="selectVet(${v.id}, '${v.nombre.replace(/'/g, "\\'")}')"
-                            title="Horario: ${v.horarioTexto}">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-xl">${v.avatar}</span>
-                                <div class="min-w-0">
-                                    <div class="text-white text-xs font-bold leading-tight truncate">${v.nombre}</div>
-                                    <div class="text-emerald-400 text-xs truncate">${v.especialidad}</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-400 text-xs mb-1">Nombre Mascota *</label>
+                                <input type="text" id="inlineMascotaNombre" placeholder="Ej: Firulais" class="bg-black/20 border border-white/10 rounded-lg px-3 py-1.5 text-white w-full text-sm focus:border-emerald-500 outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-gray-400 text-xs mb-1">Especie *</label>
+                                    <select id="inlineMascotaEspecie" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1.5 text-white w-full text-sm focus:border-emerald-500 outline-none">
+                                        <option value="Perro">Perro</option>
+                                        <option value="Gato">Gato</option>
+                                        <option value="Exótico">Exótico</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-400 text-xs mb-1">Raza</label>
+                                    <input type="text" id="inlineMascotaRaza" placeholder="Opcional" class="bg-black/20 border border-white/10 rounded-lg px-2 py-1.5 text-white w-full text-sm focus:border-emerald-500 outline-none">
                                 </div>
                             </div>
-                            <div class="vet-schedule text-gray-500 text-xs">🕐 ${v.horarioTexto}</div>
-                            <div class="vet-status text-xs mt-1"></div>
-                            <!-- Selected indicator -->
-                            <div class="vet-check hidden absolute top-2 right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            </div>
                         </div>
-                        `).join('')}
+                        <div id="inlineFormError" class="hidden text-red-400 text-xs font-semibold"></div>
+                        <div class="flex items-center justify-end gap-2 mt-2 pt-2 border-t border-white/10">
+                            <button type="button" onclick="hideInlineClientForm()" class="px-3 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors">Cancelar</button>
+                            <button type="button" id="btnSaveInline" onclick="saveInlineClientAndPet()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-1.5 rounded-lg transition-colors flex items-center gap-2">Guardar y Seleccionar</button>
+                        </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1.5">Selecciona una fecha/hora primero para ver disponibilidad. Los doctores en gris no están disponibles en ese horario.</p>
                 </div>
-                 <!-- Motivo selector -->
+
+                <!-- 2. MASCOTAS -->
+                <div id="mascotasSectionWrapper">
+                    <label class="block text-gray-400 text-sm mb-1">Mascota</label>
+                    <input type="hidden" id="citaMascotaId" name="mascota_id" value="">
+                    <div id="mascotaSelectorContainer">
+                        <p class="text-gray-600 text-xs italic">Selecciona un propietario primero para ver sus mascotas.</p>
+                    </div>
+                </div>
+
+                <!-- 3. MOTIVO DE CONSULTA -->
                  <div>
                      <label class="block text-gray-400 text-sm mb-1">Motivo de la consulta</label>
                      <select id="motivoSelect" onchange="handleMotivoChange(this.value)"
@@ -2377,70 +2532,244 @@ import Layout from '../layouts/Layout.astro';
                          class="hidden mt-2 bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-gray-600">
                      <input type="hidden" id="motivoHidden" name="motivo" value="">
                  </div>
+
+                <!-- 4. FECHA Y HORA -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Fecha y Hora</label>
+                    <input type="hidden" id="citaFecha" name="fecha_hora" value="">
+                    <input type="hidden" id="citaDateOnly" value="">
+                    <!-- Custom date navigator -->
+                    <div class="flex items-center gap-2 mb-3">
+                        <button type="button" id="datePrevBtn" onclick="navigateDatePicker(-1)" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div id="dateDisplay" class="flex-1 text-center text-white text-sm font-semibold bg-black/20 border border-white/10 rounded-lg px-4 py-2 select-none">
+                            ${formatDateDisplay(selectedDate)}
+                        </div>
+                        <button type="button" id="dateNextBtn" onclick="navigateDatePicker(1)" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">🕐 Lun–Sáb: 09:00–21:00 &nbsp;·&nbsp; Dom: Cerrado</p>
+                    <div id="timeSlotsContainer" class="w-full">
+                        <p class="text-gray-600 text-xs">Cargando horarios...</p>
+                    </div>
+                    <p id="citaSelectedSlot" class="text-emerald-400 text-xs font-semibold mt-2"></p>
+                    <div id="businessHoursWarning" class="hidden mt-2 flex items-center gap-2 bg-red-500/15 border border-red-500/30 text-red-300 text-xs rounded-lg px-3 py-2">
+                    </div>
+                </div>
+
+                <!-- 5. DOCTOR VETERINARIO -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">Doctor Veterinario</label>
+                    <input type="hidden" id="citaDoctorNombre" name="doctor_nombre" value="">
+                    <div class="grid grid-cols-2 gap-2" id="vetCardsContainer">
+                        <p class="col-span-2 text-gray-600 text-xs italic">Selecciona un motivo y una hora para ver los veterinarios disponibles.</p>
+                    </div>
+                    <p id="vetFilterMsg" class="text-xs text-gray-500 mt-1.5"></p>
+                </div>
+
+                <!-- 6. DATOS EXTRA / SÍNTOMAS -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">Datos extra o quizá síntomas</label>
+                    <textarea id="citaDatosExtra" name="datos_extra" rows="3" placeholder="Describe síntomas, observaciones adicionales o datos relevantes para la consulta..."
+                        class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-gray-600 resize-none"></textarea>
+                </div>
+
                  <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg mt-2">Agendar Cita</button>
              </form>
          `;
          modal.classList.remove('hidden');
 
-         // --- Search logic ---
-         const searchInput = document.getElementById('patientSearchInput');
-         const resultsDiv = document.getElementById('patientSearchResults');
-         const badgeDiv = document.getElementById('selectedPatientBadge');
-         const badgeText = document.getElementById('selectedPatientText');
-         const hiddenId = document.getElementById('citaMascotaId');
+         // ===== OWNER SEARCH LOGIC =====
+         const ownerSearchInput = document.getElementById('ownerSearchInput');
+         const ownerResultsDiv = document.getElementById('ownerSearchResults');
+         const ownerBadgeDiv = document.getElementById('selectedOwnerBadge');
+         const ownerBadgeText = document.getElementById('selectedOwnerText');
          const hiddenClientId = document.getElementById('citaClienteId');
 
-         searchInput.addEventListener('input', () => {
-             const q = searchInput.value.toLowerCase().trim();
-             if (q.length === 0) { resultsDiv.classList.add('hidden'); return; }
-             const matches = searchData.filter(d => d.searchText.includes(q)).slice(0, 15);
+         ownerSearchInput.addEventListener('input', () => {
+             const q = ownerSearchInput.value.toLowerCase().trim();
+             if (q.length === 0) { ownerResultsDiv.classList.add('hidden'); return; }
+             const matches = ownerSearchData.filter(d => d.searchText.includes(q)).slice(0, 15);
              if (matches.length === 0) {
-                 resultsDiv.innerHTML = '<div class="px-4 py-3 text-gray-500 text-sm">Sin resultados</div>';
+                 ownerResultsDiv.innerHTML = '<div class="px-4 py-3 text-gray-500 text-sm">Sin resultados</div>';
              } else {
-                 resultsDiv.innerHTML = matches.map(d => `
+                 ownerResultsDiv.innerHTML = matches.map(d => `
                      <div class="px-4 py-2.5 hover:bg-white/10 cursor-pointer transition-colors border-b border-white/5 last:border-b-0"
-                          onclick="selectPatient(${d.id}, ${d.clienteId}, '${d.label.replace(/'/g, "\\'")}')">
-                         <div class="text-white text-sm font-medium">${d.label}</div>
-                         <div class="text-gray-500 text-xs">${d.sublabel}</div>
+                          onclick="selectOwner(${d.id}, '${d.nombre.replace(/'/g, "\\'")}')">
+                         <div class="text-white text-sm font-medium">${d.nombre}</div>
+                         <div class="text-gray-500 text-xs">${d.telefono ? 'Tel: ' + d.telefono : 'Sin teléfono'} · ${d.mascotasCount} mascota(s)</div>
                      </div>
                  `).join('');
              }
-             resultsDiv.classList.remove('hidden');
+             ownerResultsDiv.classList.remove('hidden');
          });
 
-         searchInput.addEventListener('focus', () => {
-             if (searchInput.value.length > 0) resultsDiv.classList.remove('hidden');
+         ownerSearchInput.addEventListener('focus', () => {
+             if (ownerSearchInput.value.length > 0) ownerResultsDiv.classList.remove('hidden');
          });
 
-         // Close dropdown when clicking outside (remove previous listener first to avoid accumulation)
-         if (window._closePSearchHandler) {
-             document.removeEventListener('click', window._closePSearchHandler);
+         // Close dropdown outside
+         if (window._closeOwnerSearchHandler) {
+             document.removeEventListener('click', window._closeOwnerSearchHandler);
          }
-         window._closePSearchHandler = (e) => {
-             if (!document.getElementById('patientSearchContainer')?.contains(e.target)) {
-                 resultsDiv?.classList.add('hidden');
+         window._closeOwnerSearchHandler = (e) => {
+             if (!document.getElementById('ownerSearchContainer')?.contains(e.target)) {
+                 ownerResultsDiv?.classList.add('hidden');
              }
          };
-         document.addEventListener('click', window._closePSearchHandler);
+         document.addEventListener('click', window._closeOwnerSearchHandler);
 
-         window.selectPatient = (mascotaId, clienteId, label) => {
-             hiddenId.value = mascotaId;
+         // ===== SELECT OWNER → POPULATE MASCOTAS =====
+         window.selectOwner = (clienteId, nombre) => {
              hiddenClientId.value = clienteId;
-             badgeText.textContent = label;
-             badgeDiv.classList.remove('hidden');
-             searchInput.classList.add('hidden');
-             resultsDiv.classList.add('hidden');
+             ownerBadgeText.textContent = nombre;
+             ownerBadgeDiv.classList.remove('hidden');
+             ownerSearchInput.classList.add('hidden');
+             ownerResultsDiv.classList.add('hidden');
+
+             // Find client and their pets
+             const client = cache.clientes.find(c => c.id === clienteId);
+             const pets = client?.mascotas || [];
+             const mascotaContainer = document.getElementById('mascotaSelectorContainer');
+             const hiddenMascotaId = document.getElementById('citaMascotaId');
+
+             if (pets.length === 0) {
+                 hiddenMascotaId.value = '';
+                 mascotaContainer.innerHTML = '<p class="text-yellow-400 text-xs">⚠️ Este propietario no tiene mascotas registradas.</p>';
+             } else if (pets.length === 1) {
+                 // Auto-select the only pet
+                 hiddenMascotaId.value = pets[0].id;
+                 mascotaContainer.innerHTML = `
+                     <div class="bg-emerald-500/20 border border-emerald-500/30 rounded-lg px-4 py-2 flex items-center gap-2">
+                         <span class="text-emerald-300 text-sm font-medium">🐾 ${pets[0].nombre} <span class="text-gray-400 text-xs">(${pets[0].especie}${pets[0].raza ? ' · ' + pets[0].raza : ''})</span></span>
+                     </div>
+                 `;
+             } else {
+                 // Multiple pets — dropdown
+                 hiddenMascotaId.value = '';
+                 mascotaContainer.innerHTML = `
+                     <select id="mascotaDropdown" onchange="document.getElementById('citaMascotaId').value = this.value"
+                         class="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                         <option value="" disabled selected>Selecciona la mascota...</option>
+                         ${pets.map(p => `<option value="${p.id}">🐾 ${p.nombre} (${p.especie}${p.raza ? ' · ' + p.raza : ''})</option>`).join('')}
+                     </select>
+                 `;
+             }
          };
 
-         window.clearPatientSelection = () => {
-             hiddenId.value = '';
+         window.clearOwnerSelection = () => {
              hiddenClientId.value = '';
-             badgeDiv.classList.add('hidden');
-             searchInput.classList.remove('hidden');
-             searchInput.value = '';
-             searchInput.focus();
+             document.getElementById('citaMascotaId').value = '';
+             ownerBadgeDiv.classList.add('hidden');
+             ownerSearchInput.classList.remove('hidden');
+             ownerSearchInput.value = '';
+             ownerSearchInput.focus();
+             // Reset pet selector
+             document.getElementById('mascotaSelectorContainer').innerHTML = '<p class="text-gray-600 text-xs italic">Selecciona un propietario primero para ver sus mascotas.</p>';
          };
 
+         // ===== INLINE CLIENT/PET CREATION LOGIC =====
+         window.showInlineClientForm = () => {
+             document.getElementById('ownerSearchWrapper').classList.add('hidden');
+             document.getElementById('mascotasSectionWrapper').classList.add('hidden');
+             document.getElementById('inlineClientFormContainer').classList.remove('hidden');
+             
+             // Reset form
+             document.getElementById('inlineClienteNombre').value = '';
+             document.getElementById('inlineClienteTelefono').value = '';
+             document.getElementById('inlineMascotaNombre').value = '';
+             document.getElementById('inlineMascotaEspecie').value = 'Perro';
+             document.getElementById('inlineMascotaRaza').value = '';
+             document.getElementById('inlineFormError').classList.add('hidden');
+             document.getElementById('inlineClienteNombre').focus();
+         };
+
+         window.hideInlineClientForm = () => {
+             document.getElementById('ownerSearchWrapper').classList.remove('hidden');
+             document.getElementById('mascotasSectionWrapper').classList.remove('hidden');
+             document.getElementById('inlineClientFormContainer').classList.add('hidden');
+             document.getElementById('ownerSearchInput').focus();
+         };
+
+         window.saveInlineClientAndPet = async () => {
+             const cName = document.getElementById('inlineClienteNombre').value.trim();
+             const cPhone = document.getElementById('inlineClienteTelefono').value.trim();
+             const mName = document.getElementById('inlineMascotaNombre').value.trim();
+             const mEsp = document.getElementById('inlineMascotaEspecie').value;
+             const mRaza = document.getElementById('inlineMascotaRaza').value.trim();
+             const errDiv = document.getElementById('inlineFormError');
+             const btn = document.getElementById('btnSaveInline');
+
+             if (!cName || !mName) {
+                 errDiv.textContent = 'El nombre del propietario y de la mascota son obligatorios.';
+                 errDiv.classList.remove('hidden');
+                 return;
+             }
+
+             errDiv.classList.add('hidden');
+             btn.disabled = true;
+             btn.innerHTML = '<span class="animate-spin inline-block mr-1">↻</span> Guardando...';
+
+             try {
+                 // 1. Create client
+                 const clientRes = await fetch(`${API_URL}/api/clientes`, {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({ nombre: cName, telefono: cPhone })
+                 });
+                 
+                 if (!clientRes.ok) throw new Error('Error al crear el cliente');
+                 const clientData = await clientRes.json();
+                 
+                 // 2. Create pet associated with this client
+                 const petRes = await fetch(`${API_URL}/api/mascotas`, {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({
+                         cliente_id: clientData.id,
+                         nombre_mascota: mName,
+                         especie: mEsp,
+                         raza: mRaza
+                     })
+                 });
+                 
+                 if (!petRes.ok) throw new Error('Error al crear la mascota');
+                 const petData = await petRes.json();
+
+                 // 3. Update local caches manually to avoid fetching full lists again right now
+                 const newClient = { id: clientData.id, nombre: cName, telefono: cPhone, mascotas: [petData] };
+                 cache.clientes.unshift(newClient); 
+                 cache.mascotas.unshift(petData);
+                 
+                 // Update search index
+                 ownerSearchData.unshift({
+                     id: clientData.id,
+                     nombre: cName,
+                     telefono: cPhone,
+                     mascotasCount: 1,
+                     searchText: `${cName} ${cPhone}`.toLowerCase()
+                 });
+
+                 // 4. Hide form and auto-select
+                 hideInlineClientForm();
+                 
+                 // Use existing selectOwner logic, but we need to pass the newly constructed client object
+                 // wait, selectOwner looks it up in cache.clientes, which we just updated!
+                 selectOwner(clientData.id, cName);
+
+             } catch(err) {
+                 console.error(err);
+                 errDiv.textContent = 'Hubo un error de red. Detalles en consola.';
+                 errDiv.classList.remove('hidden');
+             } finally {
+                 btn.disabled = false;
+                 btn.innerHTML = 'Guardar y Seleccionar';
+             }
+         };
+
+         // ===== MOTIVO CHANGE → FILTER VETS =====
          window.handleMotivoChange = (val) => {
              const customInput = document.getElementById('motivoCustomInput');
              const hidden = document.getElementById('motivoHidden');
@@ -2452,46 +2781,218 @@ import Layout from '../layouts/Layout.astro';
                  customInput.classList.add('hidden');
                  hidden.value = val;
              }
+             // Re-render vet cards based on motivo + selected time
+             updateVetCards();
          };
 
-         // If a datetime was prefilled, generate slots and pre-select the matching slot
-         if (defaultDT) {
+         // ===== DATE NAVIGATION (BUTTON-BASED) =====
+         window.navigateDatePicker = (direction) => {
+             const newDate = new Date(selectedDate);
+             newDate.setDate(newDate.getDate() + direction);
+             // Clamp to [today, today+60]
+             if (newDate < today || newDate > maxDate) return;
+             selectedDate = newDate;
+             renderDatePicker();
+         };
+
+         function renderDatePicker() {
+             const display = document.getElementById('dateDisplay');
+             const prevBtn = document.getElementById('datePrevBtn');
+             const nextBtn = document.getElementById('dateNextBtn');
+             const dateOnlyHidden = document.getElementById('citaDateOnly');
+
+             display.textContent = formatDateDisplay(selectedDate);
+             dateOnlyHidden.value = toDateStr(selectedDate);
+
+             // Disable prev if at today
+             prevBtn.disabled = (selectedDate <= today);
+             // Disable next if at max
+             nextBtn.disabled = (selectedDate >= maxDate);
+
+             // Reset time selection
+             document.getElementById('citaFecha').value = '';
+             document.getElementById('citaSelectedSlot').textContent = '';
+             document.getElementById('citaDoctorNombre').value = '';
+
+             // Generate time slots for this date
+             generateTimeSlots(toDateStr(selectedDate));
+         }
+
+         // Override selectTimeSlot to also update vet cards
+         const originalSelectTimeSlot = window.selectTimeSlot;
+         window.selectTimeSlot = (dtValue) => {
+             originalSelectTimeSlot(dtValue);
+             updateVetCards();
+         };
+
+         // ===== VET CARDS RENDERING (FILTERED BY MOTIVO + TIME) =====
+         function updateVetCards() {
+             const container = document.getElementById('vetCardsContainer');
+             const filterMsg = document.getElementById('vetFilterMsg');
+             const hiddenDoctor = document.getElementById('citaDoctorNombre');
+
+             // Get current motivo
+             const motivoSelect = document.getElementById('motivoSelect');
+             const motivoHidden = document.getElementById('motivoHidden');
+             const motivoVal = motivoSelect.value === '__otro' ? (motivoHidden.value || '') : motivoSelect.value;
+
+             // Get current datetime
+             const fechaVal = document.getElementById('citaFecha')?.value || '';
+             let selectedHour = null;
+             if (fechaVal) {
+                 const dt = new Date(fechaVal);
+                 if (!isNaN(dt)) selectedHour = dt.getHours();
+             }
+
+             // If no motivo and no time selected, show placeholder
+             if (!motivoVal && selectedHour === null) {
+                 container.innerHTML = '<p class="col-span-2 text-gray-600 text-xs italic">Selecciona un motivo y una hora para ver los veterinarios disponibles.</p>';
+                 filterMsg.textContent = '';
+                 hiddenDoctor.value = '';
+                 return;
+             }
+
+             // Determine required vet tipo based on motivo
+             let requiredTipo = null;
+             if (motivoVal) {
+                 requiredTipo = MOTIVOS_GENERALES.includes(motivoVal) ? 'general' : 'especialista';
+             }
+
+             // Filter vets
+             let filteredVets = VETERINARIOS.filter(v => {
+                 // Filter by tipo if motivo is selected
+                 if (requiredTipo && v.tipo !== requiredTipo) return false;
+                 return true;
+             });
+
+             // Build filter message
+             let msgParts = [];
+             if (requiredTipo === 'general') msgParts.push('🩺 Mostrando veterinarios generales');
+             else if (requiredTipo === 'especialista') msgParts.push('⚕️ Mostrando veterinarios especialistas');
+
+             if (filteredVets.length === 0) {
+                 container.innerHTML = '<p class="col-span-2 text-yellow-400 text-xs">No hay veterinarios disponibles para este motivo.</p>';
+                 filterMsg.textContent = msgParts.join(' · ');
+                 hiddenDoctor.value = '';
+                 return;
+             }
+
+             // Render vet cards
+             container.innerHTML = filteredVets.map(v => {
+                 const turnoInfo = TURNOS[v.turno] || {};
+                 const horarioText = getVetHorarioTexto(v);
+                 const fotoHtml = v.foto
+                     ? `<img src="${v.foto}" alt="${v.nombre}" class="w-8 h-8 rounded-full object-cover">`
+                     : `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs">${v.nombre.charAt(0)}${v.nombre.split(' ').pop().charAt(0)}</div>`;
+
+                 // Check availability
+                 const available = isVetAvailable(v, selectedHour);
+                 let statusClass = '';
+                 let statusText = '';
+                 let cardOpacity = '1';
+                 let cardCursor = 'pointer';
+                 let isDisabled = false;
+
+                 if (selectedHour === null) {
+                     statusText = '';
+                 } else if (available) {
+                     statusText = '✅ Disponible';
+                     statusClass = 'text-emerald-400 font-semibold';
+                 } else {
+                     statusText = selectedHour === v.descanso ? '☕ En descanso' : '🔒 Fuera de turno';
+                     statusClass = 'text-red-400';
+                     cardOpacity = '0.45';
+                     cardCursor = 'not-allowed';
+                     isDisabled = true;
+                 }
+
+                 const tipoLabel = v.tipo === 'general' ? '🩺 General' : '⚕️ Especialista';
+
+                 return `
+                 <div class="vet-card ${isDisabled ? 'vet-unavailable' : (selectedHour !== null ? 'vet-available' : 'vet-neutral')} relative rounded-xl border border-white/10 bg-black/20 p-3 cursor-pointer
+                     transition-all duration-200 hover:border-emerald-500/50 select-none"
+                     data-vet-id="${v.id}"
+                     ${isDisabled ? 'disabled' : ''}
+                     onclick="${isDisabled ? '' : `selectVet(${v.id}, '${v.nombre.replace(/'/g, "\\'")}')`}"
+                     style="opacity:${cardOpacity}; cursor:${cardCursor}"
+                     title="Horario: ${horarioText}">
+                     <div class="flex items-center gap-2 mb-1">
+                         ${fotoHtml}
+                         <div class="min-w-0">
+                             <div class="text-white text-xs font-bold leading-tight truncate">${v.nombre}</div>
+                             <div class="text-emerald-400 text-xs truncate">${v.especialidad}</div>
+                         </div>
+                     </div>
+                     <div class="flex items-center justify-between text-xs mt-1">
+                         <span class="text-gray-500">${tipoLabel}</span>
+                     </div>
+                     <div class="vet-schedule text-gray-500 text-xs">🕐 ${horarioText}</div>
+                     <div class="vet-status text-xs mt-1 ${statusClass}">${statusText}</div>
+                     <div class="vet-check hidden absolute top-2 right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                     </div>
+                 </div>
+                 `;
+             }).join('');
+
+             filterMsg.textContent = msgParts.join(' · ');
+
+             // Clear doctor selection if previously selected vet is no longer visible
+             const currentDoctor = hiddenDoctor.value;
+             if (currentDoctor) {
+                 const stillVisible = filteredVets.some(v => v.nombre === currentDoctor);
+                 if (!stillVisible) {
+                     hiddenDoctor.value = '';
+                     document.querySelectorAll('.vet-card').forEach(c => c.classList.remove('vet-selected'));
+                 }
+             }
+         }
+
+         // Initialize: render the date picker and generate time slots
+         renderDatePicker();
+
+         // If a datetime was prefilled, try to auto-select the matching time slot
+         if (prefillDateTime) {
              setTimeout(() => {
-                 const datePart = defaultDT.slice(0, 10);
-                 generateTimeSlots(datePart);
-                 // After slots are generated, find and click the matching slot (or nearest one)
+                 const datePart = prefillDateTime.slice(0, 10);
                  setTimeout(() => {
-                     const [, timePart] = defaultDT.split('T');
-                     const [hStr, mStr] = timePart.split(':');
-                     // Round to nearest 30-min slot
-                     const h = parseInt(hStr);
-                     const m = parseInt(mStr) >= 30 ? 30 : 0;
-                     const pad = (n) => String(n).padStart(2, '0');
-                     const slotDt = `${datePart}T${pad(h)}:${pad(m)}`;
-                     const slotBtn = document.querySelector(`.time-slot-btn[data-dt="${slotDt}"]`);
-                     if (slotBtn) selectTimeSlot(slotDt, slotBtn);
-                     else checkVetAvailability('');
+                     const [, timePart] = prefillDateTime.split('T');
+                     if (timePart) {
+                         const [hStr, mStr] = timePart.split(':');
+                         const h = parseInt(hStr);
+                         const m = parseInt(mStr) >= 30 ? 30 : 0;
+                         const pad = (n) => String(n).padStart(2, '0');
+                         const slotDt = `${datePart}T${pad(h)}:${pad(m)}`;
+                         selectTimeSlot(slotDt);
+                     }
                  }, 30);
              }, 50);
          }
 
+         // ===== FORM SUBMIT =====
          document.getElementById('createCitaForm').onsubmit = async (e) => {
              e.preventDefault();
              const formData = new FormData(e.target);
              const data = Object.fromEntries(formData);
              
-             if (!data.mascota_id) { alert('Selecciona un paciente'); return; }
-             if (!data.fecha_hora || !data.fecha_hora.trim()) { alert('Selecciona una fecha y un horario disponible'); return; }
+             if (!data.cliente_id) { alert('Selecciona un propietario'); return; }
+             if (!data.mascota_id) { alert('Selecciona una mascota'); return; }
              if (!data.motivo || !data.motivo.trim()) { alert('Selecciona o escribe el motivo de la consulta'); return; }
+             if (!data.fecha_hora || !data.fecha_hora.trim()) { alert('Selecciona una fecha y un horario disponible'); return; }
              if (!data.doctor_nombre || !data.doctor_nombre.trim()) { alert('Selecciona un doctor veterinario disponible'); return; }
-             const clientId = document.getElementById('citaClienteId').value;
              
-             const motivoConDoctor = `${data.motivo} [Doctor: ${data.doctor_nombre}]`;
+             // Build motivo with doctor and optional extra data
+             const datosExtra = document.getElementById('citaDatosExtra').value.trim();
+             let motivoFinal = `${data.motivo} [Doctor: ${data.doctor_nombre}]`;
+             if (datosExtra) {
+                 motivoFinal += ` | Notas: ${datosExtra}`;
+             }
+
              const payload = {
                  fecha_hora: new Date(data.fecha_hora).toISOString(),
-                 motivo: motivoConDoctor,
+                 motivo: motivoFinal,
                  mascota_id: parseInt(data.mascota_id),
-                 cliente_id: parseInt(clientId) 
+                 cliente_id: parseInt(data.cliente_id) 
              };
 
              try {
